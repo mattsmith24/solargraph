@@ -65,10 +65,10 @@ elif timescale == 'Weekly':
     res = cur.execute(f"SELECT * from weekly where timestamp > ? and timestamp < ? order by id",
         (start_time.isoformat(), end_time.isoformat()))
 elif timescale == 'Monthly':
-    months_ago = st.slider('Months ago', min_value=1, max_value=24, value=12)
-    months_to_show = st.slider('Months to show', min_value=1, max_value=24, value=12)
-    start_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=months_ago*31)).replace(day=1)
-    end_time = (start_time + datetime.timedelta(days=months_to_show*31)).replace(day=1)
+    years_ago = st.slider('Years ago', min_value=1, max_value=10, value=2)
+    years_to_show = st.slider('Years to show', min_value=1, max_value=10, value=2)
+    start_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=366 * years_ago)).replace(day=1)
+    end_time = (start_time + datetime.timedelta(days=years_to_show*366)).replace(day=1)
     res = cur.execute(f"SELECT * from monthly where timestamp > ? and timestamp < ? order by id",
         (start_time.isoformat(), end_time.isoformat()))
 
