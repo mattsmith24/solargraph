@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import appdirs
+import plotly.express as px
 
 
 SOLARLOGGING_DATA_DIR = appdirs.user_data_dir("solarlogging", "mattsmith24")
@@ -30,10 +31,10 @@ timescale = st.sidebar.selectbox(
 cur = sqlcon.cursor()
 
 if timescale == 'Samples':
-    hours_ago = st.sidebar.slider('Hours ago', min_value=1, max_value=48, value=24)
-    hours_to_show = st.sidebar.slider('Hours to show', min_value=1, max_value=48, value=24)
-    start_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=hours_ago)
-    end_time = start_time + datetime.timedelta(hours=hours_to_show)
+    minutes_ago = st.sidebar.slider('Minutes ago', min_value=1, max_value=360, value=60)
+    minutes_to_show = st.sidebar.slider('Minutes to show', min_value=1, max_value=360, value=60)
+    start_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=minutes_ago)
+    end_time = start_time + datetime.timedelta(minutes=minutes_to_show)
     res = cur.execute("SELECT * from samples where timestamp > ? and timestamp < ? order by id",
         (start_time.isoformat(), end_time.isoformat()))
 elif timescale == '5 Minute':
@@ -61,14 +62,14 @@ elif timescale == 'Weekly':
     months_ago = st.sidebar.slider('Months ago', min_value=1, max_value=24, value=12)
     months_to_show = st.sidebar.slider('Months to show', min_value=1, max_value=24, value=12)
     start_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=months_ago*31)).replace(day=1)
-    end_time = (start_time + datetime.timedelta(days=months_to_show*31)).replace(day=1)
+    end_time = (start_time + datetime.timedelta(days=(months_to_show+1)*31)).replace(day=1)
     res = cur.execute(f"SELECT * from weekly where timestamp > ? and timestamp < ? order by id",
         (start_time.isoformat(), end_time.isoformat()))
 elif timescale == 'Monthly':
     years_ago = st.sidebar.slider('Years ago', min_value=1, max_value=10, value=2)
     years_to_show = st.sidebar.slider('Years to show', min_value=1, max_value=10, value=2)
     start_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=366 * years_ago)).replace(day=1)
-    end_time = (start_time + datetime.timedelta(days=years_to_show*366)).replace(day=1)
+    end_time = (start_time + datetime.timedelta(days=(years_to_show+1)*366)).replace(month=1,day=1)
     res = cur.execute(f"SELECT * from monthly where timestamp > ? and timestamp < ? order by id",
         (start_time.isoformat(), end_time.isoformat()))
 
@@ -93,4 +94,38 @@ if st.sidebar.checkbox('Show Home', value=True):
 
 dataframe = pd.DataFrame(data=dataframe_dict, index=np.array(timestamps))
 
-st.line_chart(dataframe)
+#st.line_chart(dataframe)
+
+
+#fig = px.histogram(dataframe, x=dataframe.index, y=['Grid','Solar','Home'], barmode='group')
+fig = px.line(dataframe)
+fig.update_layout(
+    xaxis=dict(
+        showgrid=True,
+        gridcolor='rgb(82, 82, 82)',
+        showline=False,
+        showticklabels=True,
+        ticks='outside',
+        tickfont=dict(
+            family='Arial',
+            size=12,
+            color='rgb(82, 82, 82)',
+        ),
+    ),
+    yaxis=dict(
+        showgrid=True,
+        gridcolor='rgb(82, 82, 82)',
+        zeroline=False,
+        showline=False,
+        showticklabels=True,
+        ticks='outside',
+        tickfont=dict(
+            family='Arial',
+            size=12,
+            color='rgb(82, 82, 82)',
+        ),
+    ),
+    plot_bgcolor='rgb(40, 40, 40)'
+)
+
+st.plotly_chart(fig)
