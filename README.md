@@ -15,6 +15,10 @@ The other tables are all aggregate data. The units are kwh and have slightly dif
 * `solar` - This is the amount that was generated during the sample time period and is always +ve
 * `home` - This is the amount that was consumed during the sample time period and is always +ve
 
+All of the tables have a `timestamp` column. Since sqlite3 doesn't have a datetime format, these are
+expected to be stored as text representation of ISO 8601 format with UTC timestamps.
+e.g. 2022-10-26T10:47:26.123+00:00 for October 26th 2022 at 10:47 AM and 26.123 seconds UTC.
+
 For the aggregate data tables, the 'direct consumption' can be calculated from `home - grid` and the feedin can be calculated from `solar - direct_consumption`
 
 # Requirements

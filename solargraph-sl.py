@@ -78,7 +78,11 @@ solar_vals = []
 home_vals = []
 timestamps = []
 for row in res:
-    timestamps.append(datetime.datetime.fromisoformat(row["timestamp"]))
+    # Convert timestamps to localtime for display
+    timestamps.append(
+        datetime.datetime.fromisoformat(row["timestamp"])
+        .astimezone(tz=None)
+    )
     grid_vals.append(float(row["grid"]))
     solar_vals.append(float(row["solar"]))
     home_vals.append(float(row["home"]))
