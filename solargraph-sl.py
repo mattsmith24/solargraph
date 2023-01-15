@@ -14,6 +14,7 @@ SOLARLOGGING_DB_PATH = os.path.join(SOLARLOGGING_DATA_DIR, "solarlogging.db")
 
 sqlcon = sqlite3.connect(SOLARLOGGING_DB_PATH)
 sqlcon.row_factory = sqlite3.Row
+cur = sqlcon.cursor()
 
 timescale = st.sidebar.selectbox(
     'Timescale',
@@ -27,8 +28,6 @@ timescale = st.sidebar.selectbox(
      ],
      index=1
 )
-
-cur = sqlcon.cursor()
 
 if timescale == 'Samples':
     minutes_ago = st.sidebar.slider('Minutes ago', min_value=1, max_value=360, value=60)
@@ -88,13 +87,18 @@ for row in res:
     home_vals.append(float(row["home"]))
     
 
+show_grid = st.sidebar.checkbox('Show Grid', value=True)
+show_solar = st.sidebar.checkbox('Show Solar', value=True)
+show_home = st.sidebar.checkbox('Show Home', value=True)
+
 dataframe_dict = {}
-if st.sidebar.checkbox('Show Grid', value=True):
+if show_grid:
     dataframe_dict['Grid'] = np.array(grid_vals)
-if st.sidebar.checkbox('Show Solar', value=True):
+if show_solar:
     dataframe_dict['Solar'] = np.array(solar_vals)
-if st.sidebar.checkbox('Show Home', value=True):
+if show_home:
     dataframe_dict['Home'] = np.array(home_vals)
+
 
 dataframe = pd.DataFrame(data=dataframe_dict, index=np.array(timestamps))
 

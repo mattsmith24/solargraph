@@ -38,12 +38,15 @@ The environment manager pipenv is recommended. See Pipfile
   - streamlit
   - numpy
 
+- Dash
+  - dash
+
 # Running
 
 The streamlit based grapher app is run with `streamlit run solargraph-sl.py` or if you're using pipenv: 
-`pipenv run streamlit run solargraph-sl.py`. This will start a webservice on localhost accessible at http://localhost:8501/ .
+`pipenv run streamlit run solargraph-sl.py`. This will start a webservice on localhost accessible
+at http://localhost:8501/ .
 
-
-
-
+To run the dash version, use `pipenv run python solargraph-dash.py` and navigate to
+http://127.0.0.1:8050/ .
 
