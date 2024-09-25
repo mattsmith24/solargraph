@@ -1,4 +1,5 @@
-import os
+from pathlib import Path
+import argparse
 import sqlite3
 import datetime
 
@@ -10,23 +11,31 @@ import plotly.express as px
 
 
 SOLARLOGGING_DATA_DIR = appdirs.user_data_dir("solarlogging", "mattsmith24")
-SOLARLOGGING_DB_PATH = os.path.join(SOLARLOGGING_DATA_DIR, "solarlogging.db")
+SOLARLOGGING_DB_PATH = Path(SOLARLOGGING_DATA_DIR, "solarlogging.db")
 
-sqlcon = sqlite3.connect(SOLARLOGGING_DB_PATH)
+parser = argparse.ArgumentParser(description='Solar data grapher')
+parser.add_argument('database', help='Path to sqlite3 database')
+args = parser.parse_args()
+
+database = SOLARLOGGING_DB_PATH
+if args.database:
+    database = Path(args.database)
+
+sqlcon = sqlite3.connect(database)
 sqlcon.row_factory = sqlite3.Row
 cur = sqlcon.cursor()
 
 timescale = st.sidebar.selectbox(
     'Timescale',
-     [
+    [
         'Samples',
         '5 Minute',
         'Hourly',
         'Daily',
         'Weekly',
         'Monthly'
-     ],
-     index=1
+    ],
+    index=1
 )
 
 if timescale == 'Samples':
