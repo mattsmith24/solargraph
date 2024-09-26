@@ -55,8 +55,14 @@ The environment manager venv is recommended. See requirements.txt
 
 The streamlit based grapher app is run with `streamlit run solargraph-sl.py` or
 if you're using venv: `.venv/bin/streamlit run solargraph-sl.py`. This will
-start a webservice on localhost accessible at http://localhost:8501/ .
+start a webservice on localhost accessible at http://localhost:8501/ . Add the
+path to the database as an optional parameter.
 
-To run the dash version, use `.venv/bin/python solargraph-dash.py` and navigate
-to http://127.0.0.1:8050/ .
+To run the dash version, use
+
+```
+.venv/bin/python solargraph-dash.py --database=/path/to/solarlogging.db
+```
+
+and navigate to http://127.0.0.1:8050/ .
 
