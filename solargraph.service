@@ -1,0 +1,14 @@
+[Unit]
+Description=Solar Graph Service
+After=network.target
+ 
+[Service]
+Type=exec
+User=solargraph
+Group=solargraph
+ExecStart=/opt/solargraph/.venv/bin/python /opt/solargraph/solargraph-dash.py --database=/opt/solarlogging/solarlogging.db
+Restart=always
+SyslogIdentifier=solargraph
+ 
+[Install]
+WantedBy=multi-user.target

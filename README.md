@@ -33,23 +33,7 @@ For the aggregate data tables, the 'direct consumption' can be calculated from
 
 # Requirements
 
-python modules:
-
 The environment manager venv is recommended. See requirements.txt
-
-- Common
-  - appdirs
-
-- Plotly and dash
-  - plotly
-  - pandas
-
-- Streamlit
-  - streamlit
-  - numpy
-
-- Dash
-  - dash
 
 # Running
 
@@ -66,3 +50,11 @@ To run the dash version, use
 
 and navigate to http://127.0.0.1:8050/ .
 
+# Deploy
+
+```
+sudo cp solargraph.service to /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start solargraph
+sudo systemctl enable solargraph
+```
