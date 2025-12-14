@@ -29,6 +29,9 @@ app.layout = html.Div(
             Time series solar data graph
         ''', className="paragraph"),
 
+        # Add a store component to trigger callbacks on page load
+        dcc.Store(id='page-load-trigger'),
+
         html.P(
             dcc.Dropdown(
                 [
@@ -64,6 +67,14 @@ app.layout = html.Div(
         dcc.Graph(id='solar-graph')
     ]
 )
+
+# Add callback to update date picker to today's date on page load
+@app.callback(
+    Output('end-date', 'date'),
+    Input('page-load-trigger', 'data')
+)
+def update_date_on_load(data):
+    return datetime.date.today()
 
 @app.callback(
     Output('solar-graph', 'figure'),
