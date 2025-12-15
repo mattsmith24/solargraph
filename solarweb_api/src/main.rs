@@ -34,18 +34,24 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-#[get("/samples")]
-async fn get_samples(database_path: web::Data<String>) -> impl Responder {
-    let samples = match get_samples_from_database(database_path.as_str()) {
+#[get("/samples/{table}")]
+async fn get_samples(database_path: web::Data<String>, table_request: web::Path<String>) -> impl Responder {
+    let table = match table_request.into_inner().as_str() {
+        "raw" => "samples",
+        "fiveminute" => "fiveminute",
+        "hourly" => "hourly",
+        _ => return HttpResponse::BadRequest().body("Invalid table"),
+    };
+    let samples = match get_samples_from_database(database_path.as_str(), table) {
         Ok(samples) => samples,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
     HttpResponse::Ok().json(samples)
 }
 
-fn get_samples_from_database(database_path: &str) -> Result<Vec<Sample>> {
+fn get_samples_from_database(database_path: &str, table: &str) -> Result<Vec<Sample>> {
     let conn = Connection::open(database_path)?;
-    let mut stmt = conn.prepare("SELECT * FROM samples order by id desc limit 100")?;
+    let mut stmt = conn.prepare(format!("SELECT * FROM {} order by id desc limit 100", table).as_str())?;
     let samples_iter = stmt.query_map([], |row| {
         Ok(Sample {
             id: row.get(0)?,
