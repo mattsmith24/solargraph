@@ -12,6 +12,13 @@ struct Sample {
     timestamp: String,
 }
 
+#[derive(Deserialize)]
+struct QueryParams {
+    start_timestamp: String,
+    end_timestamp: String,
+    limit: Option<i32>,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -35,24 +42,32 @@ async fn main() -> std::io::Result<()> {
 }
 
 #[get("/samples/{table}")]
-async fn get_samples(database_path: web::Data<String>, table_request: web::Path<String>) -> impl Responder {
+async fn get_samples(
+    database_path: web::Data<String>,
+    table_request: web::Path<String>,
+    query_params: web::Query<QueryParams>,
+) -> impl Responder {
     let table = match table_request.into_inner().as_str() {
         "raw" => "samples",
         "fiveminute" => "fiveminute",
         "hourly" => "hourly",
         _ => return HttpResponse::BadRequest().body("Invalid table"),
     };
-    let samples = match get_samples_from_database(database_path.as_str(), table) {
+    let samples = match get_samples_from_database(database_path.as_str(), table, &query_params.into_inner()) {
         Ok(samples) => samples,
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
     HttpResponse::Ok().json(samples)
 }
 
-fn get_samples_from_database(database_path: &str, table: &str) -> Result<Vec<Sample>> {
+fn get_samples_from_database(database_path: &str, table: &str, query_params: &QueryParams) -> Result<Vec<Sample>> {
     let conn = Connection::open(database_path)?;
-    let mut stmt = conn.prepare(format!("SELECT * FROM {} order by id desc limit 100", table).as_str())?;
-    let samples_iter = stmt.query_map([], |row| {
+    let mut stmt = conn.prepare(format!(
+        "SELECT * FROM {} WHERE timestamp >= ? AND timestamp <= ? order by id desc limit {}",
+        table,
+        query_params.limit.unwrap_or(100)
+    ).as_str())?;
+    let samples_iter = stmt.query_map([query_params.start_timestamp.clone(), query_params.end_timestamp.clone()], |row| {
         Ok(Sample {
             id: row.get(0)?,
             grid: row.get(1)?,
