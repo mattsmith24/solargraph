@@ -1,4 +1,5 @@
 import DateSelector from './components/DateSelector';
+import CurrentSolarStatus from './components/CurrentSolarStatus';
 
 interface HomeProps {
   searchParams: Promise<{ start_timestamp?: string; end_timestamp?: string }>;
@@ -23,6 +24,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div>
+      <CurrentSolarStatus />
       <h1>Samples</h1>
       <DateSelector 
         defaultStart={startTimestamp} 

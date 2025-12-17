@@ -1,4 +1,5 @@
 use actix_web::{App, HttpResponse, HttpServer, Responder, get, web};
+use actix_cors::Cors;
 use r2d2_sqlite::SqliteConnectionManager;
 use serde::Deserialize;
 use std::env;
@@ -26,7 +27,14 @@ async fn main() -> std::io::Result<()> {
     let pool = Pool::new(manager).unwrap();
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+        
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(pool.clone()))
             .service(web::scope("/api/v1").service(get_samples))
     })
