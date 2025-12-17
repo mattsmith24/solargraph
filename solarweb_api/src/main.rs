@@ -38,7 +38,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .service(web::scope("/api/v1").service(get_samples))
     })
-    .bind("127.0.0.1:3001")?
+    .bind("192.168.1.27:3001")?
     .run()
     .await
 }

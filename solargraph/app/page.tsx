@@ -18,7 +18,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const endTimestamp = params.end_timestamp || defaultEnd.toISOString();
 
   const data = await fetch(
-    `http://127.0.0.1:3001/api/v1/samples/raw?start_timestamp=${encodeURIComponent(startTimestamp)}&end_timestamp=${encodeURIComponent(endTimestamp)}`
+    `http://192.168.1.27:3001/api/v1/samples/raw?start_timestamp=${encodeURIComponent(startTimestamp)}&end_timestamp=${encodeURIComponent(endTimestamp)}`
   );
   const samples = await data.json();
 

@@ -22,7 +22,7 @@ export default function CurrentSolarStatus() {
             const query_str = `start_timestamp=${encodeURIComponent(startTimestamp.toISOString())}&end_timestamp=${encodeURIComponent(endTimestamp.toISOString())}`;
             
             const data = await fetch(
-                `http://127.0.0.1:3001/api/v1/samples/raw?${query_str}`
+                `http://192.168.1.27:3001/api/v1/samples/raw?${query_str}`
             );
             const samples = await data.json();
             setCurrentStatus(samples[0] || {});
