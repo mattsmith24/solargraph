@@ -14,7 +14,7 @@ interface SolarStatus {
 }
 
 export default function SolarPlot({ samples }: { samples: SolarStatus[] }) {
-  const x = samples.map((sample: SolarStatus) => sample.timestamp)
+  const x = samples.map((sample: SolarStatus) => new Date(sample.timestamp))
   const y = samples.map((sample: SolarStatus) => sample.solar)
 
   return (
