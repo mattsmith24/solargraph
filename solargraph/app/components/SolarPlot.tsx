@@ -17,24 +17,24 @@ export default function SolarPlot({ samples }: { samples: SolarStatus[] }) {
   const solar_trace = {
     x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
     y: samples.map((sample: SolarStatus) => sample.solar),
-    type: 'scatter',
-    mode: 'lines',
+    type: 'scatter' as const,
+    mode: 'lines' as const,
     marker: { color: 'green' },
     name: 'Solar'
   }
   const grid_trace = {
     x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
     y: samples.map((sample: SolarStatus) => sample.grid),
-    type: 'scatter',
-    mode: 'lines',
+    type: 'scatter' as const,
+    mode: 'lines' as const,
     marker: { color: 'blue' },
     name: 'Grid'
   }
   const home_trace = {
     x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
     y: samples.map((sample: SolarStatus) => sample.home),
-    type: 'scatter',
-    mode: 'lines',
+    type: 'scatter' as const,
+    mode: 'lines' as const,
     marker: { color: 'orange' },
     name: 'Home'
   }
