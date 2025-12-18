@@ -63,7 +63,7 @@ export default function CurrentSolarStatus() {
         ? new Date(currentStatus.timestamp).toLocaleTimeString()
         : 'N/A';
 
-    var plot_data = [
+    const plot_data = [
         {
             x: ['Solar', 'Grid', 'Home'],
             y: [currentStatus.solar ?? 0, currentStatus.grid ?? 0, currentStatus.home ?? 0],
