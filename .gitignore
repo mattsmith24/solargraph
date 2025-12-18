@@ -1,6 +1,6 @@
 *.html
 .venv
-solarweb_api/target
+solargraph_api/target
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
