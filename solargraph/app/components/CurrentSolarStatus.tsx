@@ -1,5 +1,10 @@
 'use client';
 
+import dynamic from 'next/dynamic';
+const Plot = dynamic(() => import('react-plotly.js'), {
+    ssr: false, // don't render on the server
+  });
+  
 import { useState, useEffect } from 'react';
 
 interface SolarStatus {
@@ -12,6 +17,7 @@ interface SolarStatus {
 export default function CurrentSolarStatus() {
     const [currentStatus, setCurrentStatus] = useState<SolarStatus>({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(true);
 
     const fetchStatus = async () => {
         try {
@@ -25,7 +31,14 @@ export default function CurrentSolarStatus() {
                 `http://192.168.1.27:3001/api/v1/samples/raw?${query_str}`
             );
             const samples = await data.json();
-            setCurrentStatus(samples[0] || {});
+
+            if (Array.isArray(samples) && samples.length > 0) {
+                setCurrentStatus(samples[0] as SolarStatus);
+                setIsOffline(false);
+            } else {
+                setIsOffline(true);
+            }
+
             setIsLoading(false);
         } catch (error) {
             console.error('Error fetching solar status:', error);
@@ -50,18 +63,33 @@ export default function CurrentSolarStatus() {
         ? new Date(currentStatus.timestamp).toLocaleTimeString()
         : 'N/A';
 
+    var plot_data = [
+        {
+            x: ['Solar', 'Grid', 'Home'],
+            y: [currentStatus.solar ?? 0, currentStatus.grid ?? 0, currentStatus.home ?? 0],
+            type: 'bar' as const
+        }
+    ];
+
     return (
         <div>
             <h1>Current Solar Status</h1>
             {isLoading ? (
                 <p>Loading...</p>
             ) : (
-                <ul>
-                    <li>Solar: {currentStatus.solar ?? 'N/A'}</li>
-                    <li>Grid: {currentStatus.grid ?? 'N/A'}</li>
-                    <li>Home: {currentStatus.home ?? 'N/A'}</li>
-                    <li>Timestamp: {timestamp}</li>
-                </ul>
+                <div>
+                    {isOffline ? (
+                        <p>PV System is Offline</p>
+                    ) : (
+                        <div>
+                            <Plot 
+                            data={plot_data} 
+                            layout={{ width: 400, height: 300, title: { text: 'Current Solar Status' } }}
+                            />
+                            <p>Timestamp: {timestamp}</p>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );
