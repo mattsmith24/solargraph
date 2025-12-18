@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 
 interface SolarStatus {
-    solar: number;
-    grid: number;
-    home: number;
-    timestamp: string;
+    solar?: number;
+    grid?: number;
+    home?: number;
+    timestamp?: string;
 }
 
 export default function CurrentSolarStatus() {
@@ -46,7 +46,9 @@ export default function CurrentSolarStatus() {
         return () => clearInterval(interval);
     }, []);
 
-    const timestamp = new Date(currentStatus.timestamp).toLocaleTimeString();
+    const timestamp = currentStatus.timestamp
+        ? new Date(currentStatus.timestamp).toLocaleTimeString()
+        : 'N/A';
 
     return (
         <div>
@@ -58,7 +60,7 @@ export default function CurrentSolarStatus() {
                     <li>Solar: {currentStatus.solar ?? 'N/A'}</li>
                     <li>Grid: {currentStatus.grid ?? 'N/A'}</li>
                     <li>Home: {currentStatus.home ?? 'N/A'}</li>
-                    <li>Timestamp: {timestamp ?? 'N/A'}</li>
+                    <li>Timestamp: {timestamp}</li>
                 </ul>
             )}
         </div>
