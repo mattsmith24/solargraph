@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(pool.clone()))
-            .service(web::scope("/api/v1").service(get_samples))
+            .service(web::scope("/api/v1").service(get_samples).service(get_daily))
     })
     .bind("192.168.1.27:3001")?
     .run()
@@ -67,4 +67,20 @@ async fn get_samples(
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
     HttpResponse::Ok().json(samples)
+}
+
+#[get("/daily")]
+async fn get_daily(db: web::Data<Pool>, query_params: web::Query<QueryParams>) -> impl Responder {
+    let daily = match db::get_samples(
+        &db,
+        String::from("daily"),
+        query_params.start_timestamp.clone(),
+        query_params.end_timestamp.clone()
+    )
+    .await
+    {
+        Ok(samples) => samples,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+    HttpResponse::Ok().json(daily)
 }
