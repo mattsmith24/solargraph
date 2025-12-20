@@ -19,6 +19,7 @@ export default function RootLayout({
           <li><Link href="/">Home</Link></li>
           <li><Link href="/samples">Samples</Link></li>
           <li><Link href="/daily">Daily</Link></li>
+          <li><Link href="/monthly">Monthly</Link></li>
         </ul>
         <div className="content">{children}</div>
       </body>

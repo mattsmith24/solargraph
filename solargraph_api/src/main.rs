@@ -36,7 +36,11 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(pool.clone()))
-            .service(web::scope("/api/v1").service(get_samples).service(get_daily))
+            .service(web::scope("/api/v1")
+                .service(get_samples)
+                .service(get_daily)
+                .service(get_monthly)
+            )
     })
     .bind("192.168.1.27:3001")?
     .run()
@@ -83,4 +87,20 @@ async fn get_daily(db: web::Data<Pool>, query_params: web::Query<QueryParams>) -
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
     };
     HttpResponse::Ok().json(daily)
+}
+
+#[get("/monthly")]
+async fn get_monthly(db: web::Data<Pool>, query_params: web::Query<QueryParams>) -> impl Responder {
+    let monthly = match db::get_samples(
+        &db,
+        String::from("monthly_averages"),
+        query_params.start_timestamp.clone(),
+        query_params.end_timestamp.clone()
+    )
+    .await
+    {
+        Ok(samples) => samples,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+    HttpResponse::Ok().json(monthly)
 }

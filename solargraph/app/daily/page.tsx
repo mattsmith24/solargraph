@@ -15,6 +15,7 @@ interface SolarStatus {
 
 interface DerivedSolarStatus {
   surplus_solar: number;
+  self_consumption: number;
   timestamp: string;
 }
 
@@ -24,7 +25,8 @@ export default async function DailyPage({ searchParams }: DailyProps) {
   
   // Default to yesterday to now if no params provided
   const defaultStart = new Date();
-  defaultStart.setDate(defaultStart.getDate() - 30);
+  defaultStart.setMonth(defaultStart.getMonth() - 1);
+  defaultStart.setDate(defaultStart.getDate() - 1);
   const defaultEnd = new Date();
 
   const startTimestamp = params.start_timestamp || defaultStart.toISOString();
@@ -49,6 +51,9 @@ export default async function DailyPage({ searchParams }: DailyProps) {
   const averge_surplus_solar = derived_samples.length > 0 
   ? derived_samples.reduce((sum, sample) => sum + sample.surplus_solar, 0) / derived_samples.length 
   : 0;
+  const averge_self_consumption = derived_samples.length > 0 
+  ? derived_samples.reduce((sum, sample) => sum + sample.self_consumption, 0) / derived_samples.length 
+  : 0;
 
   return (
     <div>
@@ -58,9 +63,10 @@ export default async function DailyPage({ searchParams }: DailyProps) {
           defaultEnd={endTimestamp} 
         />
         <SolarPlot samples={samples} />
-        <DerivedSolarPlot samples={derived_samples} />
+        <DerivedSolarPlot samples={samples} derived_samples={derived_samples}/>
         <h1>Daily Averages</h1>
         <table>
+          <tbody>
           <tr>
             <td>Average Solar</td>
             <td>{average_solar.toFixed(2)}</td>
@@ -77,6 +83,11 @@ export default async function DailyPage({ searchParams }: DailyProps) {
             <td>Average Surplus Solar</td>
             <td>{averge_surplus_solar.toFixed(2)}</td>
           </tr>
+          <tr>
+            <td>Average Self Consumption</td>
+            <td>{averge_self_consumption.toFixed(2)}</td>
+          </tr>
+          </tbody>
         </table>
     </div>
   );
@@ -86,6 +97,7 @@ function deriveDailyData(samples: SolarStatus[]) : DerivedSolarStatus[] {
   return samples.map((sample: SolarStatus) => {
     return { 
       surplus_solar: sample.solar - (sample.home - sample.grid),
+      self_consumption: sample.home - sample.grid,
       timestamp: sample.timestamp
     } as DerivedSolarStatus;
   })
