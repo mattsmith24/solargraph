@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface DateSelectorProps {
   defaultStart: string;
@@ -10,7 +10,6 @@ interface DateSelectorProps {
 
 export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
   // Convert ISO strings to datetime-local format (YYYY-MM-DDTHH:mm)
   const formatForInput = (isoString: string) => {
@@ -26,21 +25,13 @@ export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorP
   const [startDate, setStartDate] = useState(() => formatForInput(defaultStart));
   const [endDate, setEndDate] = useState(() => formatForInput(defaultEnd));
 
-  // Update local state when searchParams change (e.g., from browser back/forward)
-  useEffect(() => {
-    const start = searchParams.get('start_timestamp');
-    const end = searchParams.get('end_timestamp');
-    if (start) setStartDate(formatForInput(start));
-    if (end) setEndDate(formatForInput(end));
-  }, [searchParams]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Convert datetime-local format back to ISO string
     const startISO = new Date(startDate).toISOString();
     const endISO = new Date(endDate).toISOString();
-    
+
     // Update URL with new search params
     const params = new URLSearchParams();
     params.set('start_timestamp', startISO);

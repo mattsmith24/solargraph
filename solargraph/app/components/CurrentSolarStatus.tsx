@@ -49,9 +49,6 @@ export default function CurrentSolarStatus() {
     };
 
     useEffect(() => {
-        // Fetch immediately on mount
-        fetchStatus();
-
         // Set up interval to fetch every 30 seconds
         const interval = setInterval(() => {
             fetchStatus();
@@ -60,6 +57,9 @@ export default function CurrentSolarStatus() {
         // Cleanup interval on unmount
         return () => clearInterval(interval);
     }, []);
+
+    // Fetch immediately on mount
+    fetchStatus();
 
     const timestamp = currentStatus.timestamp
         ? new Date(currentStatus.timestamp).toLocaleTimeString()
