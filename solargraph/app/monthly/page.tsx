@@ -1,6 +1,7 @@
 import DateSelector from '../components/DateSelector';
 import SolarPlot from '../components/SolarPlot';
 import DerivedSolarPlot from '../components/DerivedSolarPlot';
+import { getApiBaseUrl } from '../lib/api';
 
 interface MonthlyProps {
     searchParams: Promise<{ start_timestamp?: string; end_timestamp?: string }>;
@@ -38,8 +39,9 @@ export default async function MonthlyPage({ searchParams }: MonthlyProps) {
     const endTimestamp = params.end_timestamp || defaultEnd.toISOString();
 
     const query_str = `start_timestamp=${encodeURIComponent(startTimestamp)}&end_timestamp=${encodeURIComponent(endTimestamp)}`;
+    const apiBaseUrl = getApiBaseUrl();
     const data = await fetch(
-      `http://192.168.1.27:3001/api/v1/monthly?${query_str}`
+      `${apiBaseUrl}/api/v1/monthly?${query_str}`
     );
     const samples = await data.json() as SolarStatus[];
     const derived_samples = deriveMonthlyData(samples)

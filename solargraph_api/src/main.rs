@@ -17,10 +17,17 @@ struct QueryParams {
 async fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: {} <database_path>", args[0]);
+        eprintln!("Usage: {} <database_path> [address] [port]", args[0]);
+        eprintln!("  address: listening address (default: localhost)");
+        eprintln!("  port: listening port (default: 4001)");
         std::process::exit(1);
     }
     let database_path = args[1].clone();
+    
+    // Parse address and port with defaults
+    let address = args.get(2).map(|s| s.as_str()).unwrap_or("localhost");
+    let port = args.get(3).map(|s| s.as_str()).unwrap_or("4001");
+    let bind_addr = format!("{}:{}", address, port);
 
     // connect to SQLite DB
     let manager = SqliteConnectionManager::file(database_path);
@@ -42,7 +49,7 @@ async fn main() -> std::io::Result<()> {
                 .service(get_monthly)
             )
     })
-    .bind("192.168.1.27:3001")?
+    .bind(&bind_addr)?
     .run()
     .await
 }
