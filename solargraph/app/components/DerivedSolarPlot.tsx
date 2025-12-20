@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 
 const Plot = dynamic(() => import('react-plotly.js'), {
   ssr: false, // don't render on the server
@@ -20,6 +21,18 @@ interface DerivedSolarStatus {
 }
 
 export default function DerivedSolarPlot({ samples, derived_samples }: { samples: SolarStatus[], derived_samples: DerivedSolarStatus[] }) {
+  const [width, setWidth] = useState(1200);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      setWidth(Math.min(window.innerWidth, 1200));
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   const solar_trace = {
     x: derived_samples.map((sample: DerivedSolarStatus) => new Date(sample.timestamp)),
     y: derived_samples.map((sample: DerivedSolarStatus) => sample.surplus_solar),
@@ -45,10 +58,25 @@ export default function DerivedSolarPlot({ samples, derived_samples }: { samples
     name: 'Self Consumption'
   }
 
+  const layout = {
+    width: width,
+    height: 480,
+    title: { text: 'Surplus Solar, Grid Usage and Self Consumption' },
+    ...(width < 900 && {
+      legend: {
+        orientation: 'h' as const,
+        y: -0.15,
+        x: 0.5,
+        xanchor: 'center' as const
+      }
+    })
+  };
+
   return (
     <Plot
       data={[solar_trace, grid_trace, self_trace]}
-      layout={{ width: 1200, height: 480, title: { text: 'Surplus Solar, Grid Usage and Self Consumption' } }}
+      layout={layout}
+      config={{ responsive: true }}
     />
   );
 }
