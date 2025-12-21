@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react';
 import styles from '../styles/Navbar.module.css'
 
-export default function NavMenu({children}: any) {
+export default function NavMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const openMenu = () => setIsOpen(!isOpen);
     const navclass = `${styles.navmenu} ${isOpen ? styles.active: '' }`;
@@ -36,7 +36,6 @@ export default function NavMenu({children}: any) {
                 </button>
             </nav>
         </header>
-        {children}
         </>
     )
 }
