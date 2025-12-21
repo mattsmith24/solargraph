@@ -14,7 +14,8 @@ export default async function SamplesPage({ searchParams }: SamplesProps) {
   const defaultStart = new Date();
   defaultStart.setDate(defaultStart.getDate() - 1);
   const defaultEnd = new Date();
-
+  defaultEnd.setDate(defaultEnd.getDate() + 1);
+  
   const startTimestamp = params.start_timestamp || defaultStart.toISOString();
   const endTimestamp = params.end_timestamp || defaultEnd.toISOString();
 

@@ -17,9 +17,7 @@ export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorP
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return `${year}-${month}-${day}`;
   };
 
   const [startDate, setStartDate] = useState(() => formatForInput(defaultStart));
@@ -29,8 +27,8 @@ export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorP
     e.preventDefault();
     
     // Convert datetime-local format back to ISO string
-    const startISO = new Date(startDate).toISOString();
-    const endISO = new Date(endDate).toISOString();
+    const startISO = new Date(startDate+'T00:00:00').toISOString();
+    const endISO = new Date(endDate+'T00:00:00').toISOString();
 
     // Update URL with new search params
     const params = new URLSearchParams();
@@ -47,7 +45,7 @@ export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorP
             Start Timestamp:
           </label>
           <input
-            type="datetime-local"
+            type="date"
             id="start_timestamp"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
@@ -59,7 +57,7 @@ export default function DateSelector({ defaultStart, defaultEnd }: DateSelectorP
             End Timestamp:
           </label>
           <input
-            type="datetime-local"
+            type="date"
             id="end_timestamp"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
