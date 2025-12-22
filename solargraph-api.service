@@ -1,15 +1,14 @@
 [Unit]
 Description=Solar Graph Service
-After=solargraph-api.service
- 
+After=network.target
+
 [Service]
 Type=exec
 User=solargraph
 Group=solargraph
-WorkingDirectory=/opt/solargraph/solargraph
-ExecStart=/usr/bin/npm run start
+ExecStart=/opt/solargraph/solargraph_api/target/release/solargraph_api /opt/solarlogging/solarlogging.db 0.0.0.0
 Restart=always
 SyslogIdentifier=solargraph
- 
+
 [Install]
 WantedBy=multi-user.target
