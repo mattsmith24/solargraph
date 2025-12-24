@@ -1,6 +1,5 @@
 import DateSelector from '../components/DateSelector';
-import SolarPlot from '../components/SolarPlot';
-import DerivedSolarPlot from '../components/DerivedSolarPlot';
+import SolarBarPlot from '../components/SolarBarPlot';
 import { getApiBaseUrl } from '../lib/api';
 
 interface MonthlyProps {
@@ -17,6 +16,7 @@ interface SolarStatus {
 interface DerivedSolarStatus {
     surplus_solar: number;
     self_consumption: number;
+    grid: number;
     timestamp: string;
 }
   
@@ -45,7 +45,42 @@ export default async function MonthlyPage({ searchParams }: MonthlyProps) {
     );
     const samples = await data.json() as SolarStatus[];
     const derived_samples = deriveMonthlyData(samples)
-
+    const solar_legend = [
+        {
+            key: 'solar',
+            name: 'Solar Generation',
+            color: '#6dffbb'
+        },
+        {
+            key: 'grid',
+            name: 'Grid Consumption',
+            color: '#6db1ff'
+        },
+        {
+            key: 'home',
+            name: 'Home Power Use',
+            color: '#ffbb6d'
+        }
+      ];
+    
+    const derived_legend = [
+        {
+            key: 'surplus_solar',
+            name: 'Surplus Solar',
+            color: '#6dffbb'
+        },
+        {
+            key: 'grid',
+            name: 'Grid Consumption',
+            color: '#6db1ff'
+        },
+        {
+            key: 'self_consumption',
+            name: 'Solar Self Consumption',
+            color: '#ffbb6d'
+        }
+    ];
+    
     return (
         <div>
             <h1>Monthly Data</h1>
@@ -53,8 +88,8 @@ export default async function MonthlyPage({ searchParams }: MonthlyProps) {
             defaultStart={startTimestamp} 
             defaultEnd={endTimestamp} 
             />
-            <SolarPlot samples={samples} />
-            <DerivedSolarPlot samples={samples} derived_samples={derived_samples} />
+            <SolarBarPlot samples={samples} legend={solar_legend} aggregation_type='monthly' />
+            <SolarBarPlot samples={derived_samples} legend={derived_legend} aggregation_type='monthly' />
         </div>
     )
 }
@@ -64,6 +99,7 @@ function deriveMonthlyData(samples: SolarStatus[]) : DerivedSolarStatus[] {
       return { 
         surplus_solar: sample.solar - (sample.home - sample.grid),
         self_consumption: sample.home - sample.grid,
+        grid: sample.grid,
         timestamp: sample.timestamp
       } as DerivedSolarStatus;
     })

@@ -100,8 +100,8 @@ export default async function DailyPage({ searchParams }: DailyProps) {
           defaultStart={startTimestamp} 
           defaultEnd={endTimestamp} 
         />
-        <SolarBarPlot samples={samples} legend={solar_legend} />
-        <SolarBarPlot samples={derived_samples} legend={derived_legend} />
+        <SolarBarPlot samples={samples} legend={solar_legend} aggregation_type='daily' />
+        <SolarBarPlot samples={derived_samples} legend={derived_legend} aggregation_type='daily' />
         <h1>Daily Averages</h1>
         <table>
           <tbody>
