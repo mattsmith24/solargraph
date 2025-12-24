@@ -30,3 +30,8 @@ h1 {
   font-size: larger;
   margin-top: 1em;
 }
+
+td {
+  padding: 0.5rem;
+  border: solid 1px gray;
+}
