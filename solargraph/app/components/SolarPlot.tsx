@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line } from 'recharts';
 
 interface SolarStatus {
-  solar: number;
-  grid: number;
-  home: number;
+  solar?: number;
+  grid?: number;
+  home?: number;
   timestamp: string;
 }
 
@@ -30,7 +30,7 @@ export default function SolarPlot({ samples }: { samples: SolarStatus[] }) {
     name: datetime.toDateString() + ' ' + datetime.toTimeString(),
     ... sample
     }
-  }).reverse();
+  });
 
   return (
     <LineChart
