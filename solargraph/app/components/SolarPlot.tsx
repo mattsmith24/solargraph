@@ -1,11 +1,8 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 
-const Plot = dynamic(() => import('react-plotly.js'), {
-  ssr: false, // don't render on the server
-});
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line } from 'recharts';
 
 interface SolarStatus {
   solar: number;
@@ -27,50 +24,34 @@ export default function SolarPlot({ samples }: { samples: SolarStatus[] }) {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  const solar_trace = {
-    x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
-    y: samples.map((sample: SolarStatus) => sample.solar),
-    type: 'scatter' as const,
-    mode: 'lines' as const,
-    marker: { color: 'green' },
-    name: 'Solar'
-  }
-  const grid_trace = {
-    x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
-    y: samples.map((sample: SolarStatus) => sample.grid),
-    type: 'scatter' as const,
-    mode: 'lines' as const,
-    marker: { color: 'blue' },
-    name: 'Grid'
-  }
-  const home_trace = {
-    x: samples.map((sample: SolarStatus) => new Date(sample.timestamp)),
-    y: samples.map((sample: SolarStatus) => sample.home),
-    type: 'scatter' as const,
-    mode: 'lines' as const,
-    marker: { color: 'orange' },
-    name: 'Home'
-  }
-
-  const layout = {
-    width: width,
-    height: 480,
-    title: { text: 'Solar Production, Grid Usage and Home Consumption' },
-    ...(width < 900 && {
-      legend: {
-        orientation: 'h' as const,
-        y: -0.15,
-        x: 0.5,
-        xanchor: 'center' as const
-      }
-    })
-  };
+  const plot_data = samples.map((sample: SolarStatus) => {
+    const datetime = new Date(sample.timestamp)
+    return {
+    name: datetime.toDateString() + ' ' + datetime.toTimeString(),
+    ... sample
+    }
+  }).reverse();
 
   return (
-    <Plot
-      data={[solar_trace, grid_trace, home_trace]}
-      layout={layout}
-      config={{ responsive: true }}
-    />
+    <LineChart
+      style={{ width: '100%', maxWidth: width, maxHeight: '400px', aspectRatio: 1.618 }}
+      responsive
+      data={plot_data}
+      margin={{
+        top: 5,
+        right: 30,
+        left: 20,
+        bottom: 5,
+      }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis width="auto" />
+      <Tooltip />
+      <Legend />
+      <Line type="monotone" name="Solar Production" dataKey="solar" stroke="#6dffbb" strokeWidth="2" dot={false}  />
+      <Line type="monotone" name="Grid Power Use" dataKey="grid" stroke="#6db1ff" strokeWidth="2" dot={false}  />
+      <Line type="monotone" name="Home Power Use" dataKey="home" stroke="#ffbb6d" strokeWidth="2" dot={false}  />
+    </LineChart>
   );
 }
