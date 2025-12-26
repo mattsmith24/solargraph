@@ -1,13 +1,8 @@
 'use client'
 
-import dynamic from 'next/dynamic';
-const Plot = dynamic(() => import('react-plotly.js'), {
-    ssr: false, // don't render on the server
-  });
+import { useState, useEffect, use } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-import { useState, useEffect } from 'react';
-
-import { use } from 'react'
 import { fetchStatus } from './CurrentSolarStatus'
 
 interface SolarStatus {
@@ -40,9 +35,16 @@ export default function CurrentSolarStatusClient({status_promise}: {
 
     const plot_data = [
         {
-            x: ['Solar', 'Grid', 'Home'],
-            y: [currentStatus.solar ?? 0, currentStatus.grid ?? 0, currentStatus.home ?? 0],
-            type: 'bar' as const
+            x: 'Solar',
+            y: currentStatus.solar ?? 0,
+        },
+        {
+            x: 'Grid',
+            y: currentStatus.grid ?? 0,
+        },
+        {
+            x: 'Home',
+            y: currentStatus.home ?? 0,
         }
     ];
 
@@ -63,10 +65,28 @@ export default function CurrentSolarStatusClient({status_promise}: {
                 <p>PV System is Offline</p>
             ) : (
                 <div>
-                    <Plot
-                    data={plot_data}
-                    layout={{ width: 400, height: 300, title: { text: 'Current Solar Status' } }}
-                    />
+                    <BarChart
+                        style={{ width: '100%', maxWidth: '400px', maxHeight: '400px', aspectRatio: 1.618 }}
+                        responsive
+                        data={plot_data}
+                        margin={{
+                            top: 5,
+                            right: 0,
+                            left: 0,
+                            bottom: 5,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="x" />
+                        <YAxis width="auto" />
+                        <Tooltip />
+                        <Bar
+                            name="Power"
+                            dataKey="y"
+                            fill="#ffbb6d"
+                            activeBar={{ fill: "#ffbb6d", stroke: "#ffbb6d" }}
+                            radius={[10, 10, 0, 0]} />
+                    </BarChart>
                     <p>Timestamp: {timestamp}</p>
                 </div>
             )}
