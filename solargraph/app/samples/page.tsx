@@ -157,7 +157,7 @@ function padSamples(samples: SolarStatus[], startTimestamp: string): SolarStatus
 }
 
 function calcFeedInTariff(samples: SolarStatus[]): Tariff {
-  let result = { grid: 0, timestamp: '' } as SolarStatus;
+  const result = { grid: 0, timestamp: '' } as SolarStatus;
   const sum = samples.reduce(
     (result: SolarStatus, sample: SolarStatus) => {
       const new_grid = sample.grid ?? 0;
@@ -191,7 +191,7 @@ function calcFeedInTariff(samples: SolarStatus[]): Tariff {
 }
 
 function calcDemandTariff(samples: SolarStatus[]): Tariff {
-  let result = { grid: 0, timestamp: "" } as SolarStatus;
+  const result = { grid: 0, timestamp: "" } as SolarStatus;
   const sum = samples.reduce(
     (result: SolarStatus, sample: SolarStatus) => {
       const result_grid = result.grid ?? 0;
@@ -215,7 +215,7 @@ function calcDemandTariff(samples: SolarStatus[]): Tariff {
 }
 
 function calcGeneralTariff(samples: SolarStatus[]): Tariff {
-  let result = { grid: 0, timestamp: "" } as SolarStatus;
+  const result = { grid: 0, timestamp: "" } as SolarStatus;
   const sum = samples.reduce(
     (result: SolarStatus, sample: SolarStatus) => {
       const result_grid = result.grid ?? 0;
