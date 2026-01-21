@@ -188,7 +188,7 @@ export default async function DailyPage({ searchParams }: DailyProps) {
           </tr>
           <tr>
             <td>
-              Monthly Energy Cost
+              Total Energy Cost
             </td>
             <td>
               -
@@ -199,7 +199,7 @@ export default async function DailyPage({ searchParams }: DailyProps) {
           </tr>
           <tr>
             <td>
-              Bill if a 30kWh battery was installed
+              Cost if a 30kWh battery was installed
             </td>
             <td>
               {tariff_with_battery.energy.toFixed(2)} kWH
