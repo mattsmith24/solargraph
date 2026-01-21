@@ -20,6 +20,11 @@ interface DerivedSolarStatus {
   timestamp: string;
 }
 
+interface Tariff {
+  energy: number;  // kWH
+  tariff: number;  // $
+}
+
 export default async function DailyPage({ searchParams }: DailyProps) {
   // Await searchParams as it's now a Promise in Next.js 16
   const params = await searchParams;
@@ -56,6 +61,20 @@ export default async function DailyPage({ searchParams }: DailyProps) {
   const averge_self_consumption = derived_samples.length > 0 
   ? derived_samples.reduce((sum, sample) => sum + sample.self_consumption, 0) / derived_samples.length 
   : 0;
+
+  const feedin_tariff = calcFeedInTariff(derived_samples);
+  const general_tariff = calcGeneralTariff(derived_samples);
+  const typical_demand = {
+    energy: general_tariff.energy * 0.15,
+    tariff: general_tariff.energy * 0.15 * 0.1686
+  }
+  const total_energy_cost = {
+    energy: general_tariff.energy + typical_demand.energy - feedin_tariff.energy,
+    tariff: general_tariff.tariff + typical_demand.tariff - feedin_tariff.tariff
+  }
+  const tariff_with_battery = tariffWithBattery(derived_samples);
+  const savings_with_battery = total_energy_cost.tariff - tariff_with_battery.tariff;
+
 
   const solar_legend = [
     {
@@ -127,6 +146,81 @@ export default async function DailyPage({ searchParams }: DailyProps) {
           </tr>
           </tbody>
         </table>
+
+        <h1>Tariff Estimates</h1>
+        <p><i>Note: Demand is guessed based on a typical percentage. Calculations assume that the battery covers the
+          demand period.</i></p>
+          <p><i>Note: The actual bill includes a daily connection charge and GST.</i></p>
+        <table>
+          <tbody>
+          <tr>
+            <td>
+              Feedin Tariff
+            </td>
+            <td>
+              {feedin_tariff.energy.toFixed(2)} kWH
+            </td>
+            <td>
+              ${feedin_tariff.tariff.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              General Tariff
+            </td>
+            <td>
+              {general_tariff.energy.toFixed(2)} kWH (includes demand kWH)
+            </td>
+            <td>
+              ${general_tariff.tariff.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Typical Demand
+            </td>
+            <td>
+              {typical_demand.energy.toFixed(2)} kWH
+            </td>
+            <td>
+              ${typical_demand.tariff.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Monthly Energy Cost
+            </td>
+            <td>
+              -
+            </td>
+            <td>
+              ${total_energy_cost.tariff.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Bill if a 30kWh battery was installed
+            </td>
+            <td>
+              {tariff_with_battery.energy.toFixed(2)} kWH
+            </td>
+            <td>
+              ${tariff_with_battery.tariff.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Savings if a 30kWh battery was installed
+            </td>
+            <td>
+              -
+            </td>
+            <td>
+              ${savings_with_battery.toFixed(2)}
+            </td>
+          </tr>
+          </tbody>
+        </table>
     </div>
   );
 }
@@ -140,4 +234,71 @@ function deriveDailyData(samples: SolarStatus[]) : DerivedSolarStatus[] {
       timestamp: sample.timestamp
     } as DerivedSolarStatus;
   })
+}
+
+function calcFeedInTariff(samples: DerivedSolarStatus[]): Tariff {
+  const result = { energy: 0, tariff: 0 } as Tariff;
+  return samples.reduce(
+    (result: Tariff, sample: DerivedSolarStatus) => {
+      const energy = sample.surplus_solar ?? 0;
+      const result_energy = result.energy ?? 0;
+      const result_tariff = result.tariff ?? 0;
+      // AGL first 10 kWH is 10c/kwh
+      let remaining_kWH = energy;
+      let tariff = 0;
+      if (remaining_kWH > 10) {
+        tariff += 0.1 * 10;
+        remaining_kWH -= 10;
+      } else {
+        tariff += 0.1 * remaining_kWH;
+        remaining_kWH = 0;
+      }
+      // After that it's 3 c/kWH
+      tariff += 0.03 * remaining_kWH;
+      result.energy = result_energy + energy;
+      result.tariff = result_tariff + tariff;
+      return result;
+    },
+    result  // initial value
+  )
+}
+
+function calcGeneralTariff(samples: DerivedSolarStatus[]): Tariff {
+  const result = { energy: 0, tariff: 0 } as Tariff;
+  return samples.reduce(
+    (result: Tariff, sample: DerivedSolarStatus) => {
+      const result_energy = result.energy ?? 0;
+      const result_tariff = result.tariff ?? 0;
+      const sample_grid = sample.grid ?? 0;
+      if (sample_grid > 0) {
+        result.energy = result_energy + sample_grid;
+      }
+      result.tariff = result_tariff + 0.307 * sample_grid;
+      return result;
+    },
+    result  // initial value
+  )
+}
+
+function tariffWithBattery(samples: DerivedSolarStatus[]): Tariff {
+  const result = { energy: 0, tariff: 0 } as Tariff;
+  return samples.reduce(
+    (result: Tariff, sample: DerivedSolarStatus) => {
+      const battery_charge = Math.min(sample.surplus_solar ?? 0, 30);
+      let new_general = sample.grid ?? 0;
+      if (new_general < battery_charge) {
+        new_general = 0;
+      } else {
+        new_general -= battery_charge;
+      }
+    
+      const result_energy = result.energy ?? 0;
+      const result_tariff = result.tariff ?? 0;
+      result.energy = result_energy + new_general;
+      result.tariff = result_tariff + new_general * 0.307;
+      return result;
+    },
+    result  // initial value
+  )
+
 }
